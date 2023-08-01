@@ -6,7 +6,7 @@ const {
 } = require('../errors/errors');
 const { errorMessages } = require('../utils/constants');
 
-getMovies = (req, res, next) => {
+const getMovies = (req, res, next) => {
   const userId = req.user._id;
 
   Movie.find({ owner: userId }).populate('owner')
@@ -16,9 +16,9 @@ getMovies = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-}
+};
 
-createMovie = (req, res, next) => {
+const createMovie = (req, res, next) => {
   const {
     movieId,
     country,
@@ -57,7 +57,7 @@ createMovie = (req, res, next) => {
     });
 };
 
-deleteMovie = (req, res, next) => {
+const deleteMovie = (req, res, next) => {
   Movie.findById(req.params._id)
     .then((movie) => {
       if (!movie) next(new NotFoundError(errorMessages.movieNotFound));

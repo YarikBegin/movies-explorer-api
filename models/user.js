@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { errorMessages } = require ('../utils/constants');
+const { errorMessages } = require('../utils/constants');
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       validate: {
         validator: validator.isEmail,
         message: errorMessages.incorrectEmail,
-      }
+      },
     },
     password: {
       type: String,
@@ -26,6 +26,6 @@ const userSchema = new mongoose.Schema(
     },
   },
   { versionKey: false },
-)
+);
 
 module.exports = mongoose.model('User', userSchema);

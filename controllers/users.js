@@ -4,16 +4,16 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const {
   BadRequestError,
+  UnauthorizedError,
   NotFoundError,
   ConflictError,
-  UnauthorizedError,
 } = require('../errors/errors');
 const { errorMessages } = require('../utils/constants');
 
 const SALT_ROUNDS = 10;
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-getMe = (req, res, next) => {
+const getMe = (req, res, next) => {
   const { _id } = req.user;
   User.find({ _id })
     .then((user) => {
@@ -25,25 +25,25 @@ getMe = (req, res, next) => {
     .catch(next);
 };
 
-createUser = (req, res, next) => {
+const createUser = (req, res, next) => {
   const { name, email, password } = req.body;
 
-  const createUser = (hash) => User.create({
+  const creatingUser = (hash) => User.create({
     name,
     email,
     password: hash,
   });
 
-  const findOne = (hash) => User.findOne({email}).then((user) => ({user, hash}))
+  const findOne = (hash) => User.findOne({ email }).then((user) => ({ user, hash }));
 
   bcrypt
     .hash(password, SALT_ROUNDS)
     .then(findOne)
-    .then(({user, hash}) => {
-      if(user) {
-        throw new ConflictError(errorMessages.createUser)
+    .then(({ user, hash }) => {
+      if (user) {
+        throw new ConflictError(errorMessages.createUser);
       }
-      return createUser(hash)
+      return creatingUser(hash);
     })
     .then((user) => {
       const { _id } = user;
@@ -60,7 +60,7 @@ createUser = (req, res, next) => {
     });
 };
 
-updateProfile = (req, res, next) => {
+const updateProfile = (req, res, next) => {
   const { name, email } = req.body;
 
   const findAndUpdate = () => User.findByIdAndUpdate(
@@ -85,20 +85,33 @@ updateProfile = (req, res, next) => {
     .catch(next);
 };
 
-login = (req, res, next) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
+
+  if (!email || !password) {
+    throw new BadRequestError(errorMessages.missingData);
+  }
+  return User.findOne({ email }).select('+password')
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-        {
-          expiresIn: '7d',
-        },
-      );
-      res.send({ token });
+      if (!user) {
+        throw new UnauthorizedError(errorMessages.userNotFound);
+      }
+      return bcrypt.compare(password, user.password)
+        .then((correctPassword) => {
+          if (!correctPassword) {
+            throw new UnauthorizedError(errorMessages.incorrectData);
+          }
+          const token = jwt.sign(
+            { _id: user._id },
+            NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+            { expiresIn: '7d' },
+          );
+          return res.send({ jwt: token });
+        });
     })
-    .catch(next);
+    .catch((error) => {
+      next(error);
+    });
 };
 
 module.exports = {

@@ -10,12 +10,12 @@ const errorMessages = {
   userNotFound: 'Пользователь не найден',
   createUser: 'Пользователь уже существует',
   updateProfile: 'Email уже зарегистрирован',
+  missingData: 'Не передан email или пароль.',
   incorrectData: 'Неправильные почта или пароль',
   incorrectEmail: 'Некорректный формат почты',
   incorrectPath: 'Неправильный путь',
   auth: 'Необходима авторизация',
   crash: 'Сервер сейчас упадёт',
-}
-
+};
 
 module.exports = { validationRegex, errorMessages };
