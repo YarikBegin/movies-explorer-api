@@ -1,4 +1,4 @@
-const { mongoose, Schema } = require('mongoose');
+const mongoose = require('mongoose');
 const { validationRegex } = require('../utils/constants');
 
 const movieSchema = new mongoose.Schema(
@@ -43,7 +43,7 @@ const movieSchema = new mongoose.Schema(
       validate: validationRegex,
     },
     owner: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       reference: 'user',
       required: true,
     },

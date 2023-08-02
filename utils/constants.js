@@ -16,6 +16,7 @@ const errorMessages = {
   incorrectPath: 'Неправильный путь',
   auth: 'Необходима авторизация',
   crash: 'Сервер сейчас упадёт',
+  serverError: 'На сервере произошла ошибка',
 };
 
 module.exports = { validationRegex, errorMessages };
